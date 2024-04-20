@@ -17,7 +17,7 @@ public abstract class CRUDService<E, ID, D> {
 
     public D create(D dto) {
         E newEntity = adapter.fromDTO(dto);
-        checksave(dto, newEntity);
+        checkSave(dto, newEntity);
         return getDTOFromEntity(repository.save(newEntity));
     }
 
@@ -32,7 +32,6 @@ public abstract class CRUDService<E, ID, D> {
 
     public D update(ID id, D dto) {
         E entity = getById(id);
-        checksave(dto, entity);
         updateData(dto, entity);
         return getDTOFromEntity(repository.save(entity));
     }
@@ -48,7 +47,7 @@ public abstract class CRUDService<E, ID, D> {
 
     protected abstract void updateData(D dto, E entity);
 
-    protected abstract void checksave(D dto, E newEntity);
+    protected abstract void checkSave(D dto, E newEntity);
 
     private D getDTOFromEntity(E entity) {
         return adapter.fromEntity(entity);

@@ -26,7 +26,7 @@ public class UserService extends CRUDService<User, Integer, UserDTO> {
     }
 
     @Override
-    protected void checksave(UserDTO userDTO, User user) {
+    protected void checkSave(UserDTO userDTO, User user) {
         boolean userAlreadyExists = userRepository.findByEmail(userDTO.email()).isPresent();
         if (userAlreadyExists) {
             throw new RuntimeException("usuario ja existe");
