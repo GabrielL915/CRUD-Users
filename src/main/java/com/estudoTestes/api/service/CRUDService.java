@@ -2,22 +2,25 @@ package com.estudoTestes.api.service;
 
 import com.estudoTestes.api.repository.CRUDRepository;
 import com.estudoTestes.api.service.adapter.Adapter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+
 
 @Service
-@RequiredArgsConstructor
 public abstract class CRUDService<E, ID, D> {
-
     private final CRUDRepository<E, ID> repository;
-
     private final Adapter<E, D> adapter;
+
+    public CRUDService(CRUDRepository<E, ID> repository, Adapter<E, D> adapter) {
+        this.repository = repository;
+        this.adapter = adapter;
+    }
 
     public D create(D dto) {
         E newEntity = adapter.fromDTO(dto);
-        checkSave(dto, newEntity);
+        validateNewEntity(dto, newEntity);
         return getDTOFromEntity(repository.save(newEntity));
     }
 
@@ -26,13 +29,13 @@ public abstract class CRUDService<E, ID, D> {
     }
 
     public D findById(ID id) {
-        var entity = getById(id);
+        E entity = repository.findById(id).orElseThrow(() -> new NoSuchElementException("Elemento com ID " + id + " não encontrado."));
         return getDTOFromEntity(entity);
     }
 
     public D update(ID id, D dto) {
-        E entity = getById(id);
-        updateData(dto, entity);
+        E entity = repository.findById(id).orElseThrow(() -> new NoSuchElementException("Elemento com ID " + id + " não encontrado."));
+        updateEntityData(dto, entity);
         return getDTOFromEntity(repository.save(entity));
     }
 
@@ -40,18 +43,11 @@ public abstract class CRUDService<E, ID, D> {
         repository.deleteById(id);
     }
 
+    protected abstract void updateEntityData(D dto, E entity);
 
-    private E getById(ID id) {
-        return repository.findById(id).orElseThrow();
-    }
-
-    protected abstract void updateData(D dto, E entity);
-
-    protected abstract void checkSave(D dto, E newEntity);
+    protected abstract void validateNewEntity(D dto, E entity);
 
     private D getDTOFromEntity(E entity) {
         return adapter.fromEntity(entity);
     }
-
-
 }
