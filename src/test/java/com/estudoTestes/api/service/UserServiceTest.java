@@ -3,6 +3,7 @@ package com.estudoTestes.api.service;
 
 import com.estudoTestes.api.domain.dto.UserDTO;
 import com.estudoTestes.api.domain.entity.User;
+import com.estudoTestes.api.repository.CRUDRepository;
 import com.estudoTestes.api.repository.custom.UserRepository;
 import com.estudoTestes.api.service.adapter.custom.UserAdapter;
 import com.estudoTestes.api.service.custom.UserService;
@@ -12,13 +13,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class UserServiceTest {
@@ -33,6 +36,9 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository repository;
+
+    @Mock
+    private CRUDRepository crudRepository;
 
     @Mock
     private UserAdapter adapter;
@@ -50,14 +56,21 @@ public class UserServiceTest {
     }
 
     @Test
-    void whenFindByIdThenReturnAnUserIstance() {
-        when(repository.findById(anyInt())).thenReturn(optionalUser);
-        User response = repository.findById(ID).orElseThrow();
-        assertNotNull(response);
+    void whenFindByIdThenReturnAnUserInstance() {
+        User entity = mock(User.class);
+        CRUDRepository<User, Integer> repository = mock(CRUDRepository.class);
 
-        assertEquals(ID, response.getId());
-//        assertEquals(NAME, response.name());
-//        assertEquals(EMAIL, response.email());
+        when(repository.findById(any())).thenReturn(Optional.ofNullable(entity));
+
+        UserDTO response = mock(UserDTO.class);
+
+        when(adapter.fromEntity(entity)).thenReturn(response);
+
+        var result = service.findById(1);
+
+        verify(repository).findById(any());
+        verify(adapter).fromEntity(entity);
+
     }
 
     private void startUser() {

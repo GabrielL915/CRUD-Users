@@ -29,7 +29,8 @@ public abstract class CRUDService<E, ID, D> {
     }
 
     public D findById(ID id) {
-        E entity = repository.findById(id).orElseThrow(() -> new NoSuchElementException("Elemento com ID " + id + " não encontrado."));
+        E entity = repository.findById(id).orElseThrow(
+                () -> new NoSuchElementException("Elemento com ID " + id + " não encontrado."));
         return getDTOFromEntity(entity);
     }
 
