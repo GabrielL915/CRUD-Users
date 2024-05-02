@@ -4,79 +4,82 @@ package com.estudoTestes.api.service;
 import com.estudoTestes.api.domain.dto.UserDTO;
 import com.estudoTestes.api.domain.entity.User;
 import com.estudoTestes.api.repository.CRUDRepository;
-import com.estudoTestes.api.repository.custom.UserRepository;
-import com.estudoTestes.api.service.adapter.custom.UserAdapter;
+import com.estudoTestes.api.service.adapter.Adapter;
 import com.estudoTestes.api.service.custom.UserService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class UserServiceTest {
-    private static final Integer ID = 1;
-    private static final String NAME = "AA";
-    private static final String EMAIL = "AA@gmail.com";
-    private static final String PASSWORD = "123";
-
 
     @InjectMocks
-    private UserService service;
+    private UserService userService;
+
+//    @Mock
+//    private UserRepository userRepository;
 
     @Mock
-    private UserRepository repository;
+    private CRUDRepository<User, Integer> crudRepository;
 
     @Mock
-    private CRUDRepository crudRepository;
-
-    @Mock
-    private UserAdapter adapter;
-
-    private User user;
-
-    private UserDTO userDTO;
-
-    private Optional<User> optionalUser;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        startUser();
-    }
+    private Adapter<User, UserDTO> userAdapter;
 
     @Test
     void whenFindByIdThenReturnAnUserInstance() {
-        User entity = mock(User.class);
-        CRUDRepository<User, Integer> repository = mock(CRUDRepository.class);
-
-        when(repository.findById(any())).thenReturn(Optional.ofNullable(entity));
+        User user = mock(User.class);
+        when(crudRepository.findById(anyInt())).thenReturn(Optional.of(user));
 
         UserDTO response = mock(UserDTO.class);
+        when(userAdapter.fromEntity(any(User.class))).thenReturn(response);
 
-        when(adapter.fromEntity(entity)).thenReturn(response);
+        userService.findById(1);
 
-        var result = service.findById(1);
-
-        verify(repository).findById(any());
-        verify(adapter).fromEntity(entity);
-
+        verify(crudRepository).findById(1);
+        verify(userAdapter).fromEntity(user);
     }
 
-    private void startUser() {
-        user = new User(ID, NAME, EMAIL, PASSWORD);
-        userDTO = new UserDTO(ID, NAME, EMAIL, PASSWORD);
-        optionalUser = Optional.of((new User(ID, NAME, EMAIL, PASSWORD)));
+    @Test
+    void whenFindAllThenReturnUserInstance() {
+        User user = mock(User.class);
+        when(crudRepository.findAll()).thenReturn(List.of(user));
 
+        UserDTO response = mock(UserDTO.class);
+        when(userAdapter.fromEntity(any(User.class))).thenReturn(response);
+
+        userService.findAll();
+
+        verify(crudRepository).findAll();
+        verify(userAdapter).fromEntity(user);
     }
+
+//    @Test
+//    void whenCreateThenReturnUserInstance() {
+//        UserDTO userDTO = mock(UserDTO.class);
+//        User user = mock(User.class);
+//
+//        when(userAdapter.fromDTO(any(UserDTO.class))).thenReturn(user);
+//
+//        when(crudRepository.save(any(User.class))).thenReturn(user);
+//
+//        when(userAdapter.fromEntity(any(User.class))).thenReturn(userDTO);
+//
+//        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+//
+//        userService.create(userDTO);
+//
+//        verify(userAdapter).fromDTO(userDTO);
+//        verify(crudRepository).save(user);
+//        verify(userAdapter).fromEntity(user);
+//
+//    }
+
 }
