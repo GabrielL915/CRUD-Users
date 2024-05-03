@@ -4,6 +4,7 @@ package com.estudoTestes.api.service;
 import com.estudoTestes.api.domain.dto.UserDTO;
 import com.estudoTestes.api.domain.entity.User;
 import com.estudoTestes.api.repository.CRUDRepository;
+import com.estudoTestes.api.repository.custom.UserRepository;
 import com.estudoTestes.api.service.adapter.Adapter;
 import com.estudoTestes.api.service.custom.UserService;
 import org.junit.jupiter.api.Test;
@@ -24,8 +25,8 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-//    @Mock
-//    private UserRepository userRepository;
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private CRUDRepository<User, Integer> crudRepository;
@@ -61,25 +62,27 @@ public class UserServiceTest {
         verify(userAdapter).fromEntity(user);
     }
 
-//    @Test
-//    void whenCreateThenReturnUserInstance() {
-//        UserDTO userDTO = mock(UserDTO.class);
-//        User user = mock(User.class);
-//
-//        when(userAdapter.fromDTO(any(UserDTO.class))).thenReturn(user);
-//
-//        when(crudRepository.save(any(User.class))).thenReturn(user);
-//
-//        when(userAdapter.fromEntity(any(User.class))).thenReturn(userDTO);
-//
-//        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-//
-//        userService.create(userDTO);
-//
-//        verify(userAdapter).fromDTO(userDTO);
-//        verify(crudRepository).save(user);
-//        verify(userAdapter).fromEntity(user);
-//
-//    }
+    @Test
+    void whenCreateValidUserThenReturnUserDTO() {
+        UserDTO newUserDTO = new UserDTO(1, "aa", "email@example.com", "senha123");
+        User newUser = new User();
 
+        newUser.setId(newUserDTO.id());
+        newUser.setName(newUserDTO.name());
+        newUser.setEmail(newUserDTO.email());
+        newUser.setPassword(newUserDTO.password());
+
+        when(userAdapter.fromDTO(any(UserDTO.class))).thenReturn(newUser);
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(crudRepository.save(any(User.class))).thenReturn(newUser);
+        when(userAdapter.fromEntity(any(User.class))).thenReturn(newUserDTO);
+
+
+        userService.create(newUserDTO);
+
+        verify(crudRepository).save(newUser);
+        verify(userAdapter).fromEntity(newUser);
+
+    }
 }
