@@ -24,6 +24,7 @@ import java.util.List;
 public class UserController {
 
     private static final String PATH_VARIABLE = "/{id}";
+    private static final String PATH_PAGINATE = "/page/{pageNumber}/{pageSize}";
     private final CRUDService<User, Integer, UserDTO> service;
 
     @PostMapping
@@ -38,6 +39,12 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAll() {
         return ResponseEntity.ok().body(service.findAll());
+    }
+
+    @GetMapping(PATH_PAGINATE)
+    public ResponseEntity<List<UserDTO>> getAllPage(@PathVariable("pageNumber") final int pageNumber,
+                                                    @PathVariable("pageSize") final int pageSize) {
+        return ResponseEntity.ok().body(service.findAllByPage(pageNumber, pageSize));
     }
 
     @GetMapping(PATH_VARIABLE)

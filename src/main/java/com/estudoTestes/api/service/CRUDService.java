@@ -2,8 +2,10 @@ package com.estudoTestes.api.service;
 
 import com.estudoTestes.api.repository.CRUDRepository;
 import com.estudoTestes.api.service.adapter.Adapter;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -26,6 +28,14 @@ public abstract class CRUDService<E, ID, D> {
 
     public List<D> findAll() {
         return repository.findAll().stream().map(this::getDTOFromEntity).toList();
+    }
+
+    public List<D> findAllByPage(int pageNumber, int pageSize) {
+        List<E> entities = repository.findAll();
+        return entities.stream().skip((long) (pageNumber - 1) * pageSize)
+                .limit(pageSize)
+                .map(this::getDTOFromEntity)
+                .toList();
     }
 
     public D findById(ID id) {
